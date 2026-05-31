@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle + ' – SmartTask'}">Task Form – SmartTask</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --primary:   #5b4fff;
+            --primary-d: #4338f5;
+            --accent:    #ff6b6b;
+            --bg:        #0d0f1a;
+            --sidebar:   #111422;
+            --card:      #161927;
+            --border:    rgba(255,255,255,0.07);
+            --text:      #e8eaf6;
+            --muted:     #8b8fa8;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed; top: 0; left: 0;
+            width: 250px; height: 100vh;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            padding: 1.5rem 1rem;
+            z-index: 200;
+        }
+        .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; color: var(--text); text-decoration: none; padding: .5rem .75rem; display: flex; align-items: center; gap: .5rem; }
+        .brand span { color: var(--primary); }
+        .nav-label { font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; padding: 1.2rem .75rem .4rem; }
+        .nav-link-custom { display: flex; align-items: center; gap: .65rem; padding: .6rem .75rem; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: .9rem; transition: background .15s, color .15s; margin-bottom: 2px; }
+        .nav-link-custom:hover, .nav-link-custom.active { background: rgba(91,79,255,.15); color: #a99cff; }
+        .nav-link-custom i { font-size: 1.05rem; }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+        /* Main */
+        .main-content { margin-left: 250px; padding: 2rem 2.5rem; min-height: 100vh; }
+        .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+        .back-btn { display: flex; align-items: center; gap: .4rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: .5rem .9rem; color: var(--muted); text-decoration: none; font-size: .85rem; transition: color .15s; }
+        .back-btn:hover { color: var(--text); }
+        .page-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.6rem; }
+
+        /* Form card */
+        .form-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.2rem 2.5rem;
+            max-width: 700px;
+            animation: fadeUp .4s ease both;
+        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+        .form-label { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .45rem; }
+        .input-group-text { background: #1e2235; border: 1px solid var(--border); color: var(--muted); }
+        .form-control, .form-select {
+            background: #1e2235;
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: .7rem 1rem;
+            font-size: .95rem;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .form-control:focus, .form-select:focus { background: #1e2235; color: var(--text); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,79,255,.18); outline: none; }
+        .form-control::placeholder { color: #454869; }
+        .form-select option { background: #1e2235; color: var(--text); }
+        .form-control.is-invalid, .form-select.is-invalid { border-color: var(--accent) !important; }
+        .invalid-feedback { color: #f87171; font-size: .8rem; }
+
+        .input-group .form-control { border-radius: 0 10px 10px 0; }
+        .input-group .input-group-text:first-child { border-radius: 10px 0 0 10px; }
+
+        textarea.form-control { resize: vertical; min-height: 110px; }
+
+        .section-title { font-family: 'Syne', sans-serif; font-size: .88rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; padding-bottom: .5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.2rem; }
+
+        .btn-save {
+            background: var(--primary); color: #fff; border: none;
+            border-radius: 12px; padding: .72rem 2rem;
+            font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem;
+            transition: background .2s, transform .15s;
+            box-shadow: 0 6px 20px rgba(91,79,255,.35);
+        }
+        .btn-save:hover { background: var(--primary-d); transform: translateY(-2px); }
+        .btn-cancel-form {
+            background: #1e2235; color: var(--muted); border: 1px solid var(--border);
+            border-radius: 12px; padding: .72rem 2rem;
+            font-family: 'Syne', sans-serif; font-weight: 600; font-size: .95rem;
+            text-decoration: none; transition: color .15s;
+            display: inline-block;
+        }
+        .btn-cancel-form:hover { color: var(--text); }
+
+        /* Priority/status colour hints */
+        .hint-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; }
+        .hint-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 600; }
+        .chip-high  { background: rgba(239,68,68,.15); color: #f87171; }
+        .chip-med   { background: rgba(245,158,11,.15); color: #fbbf24; }
+        .chip-low   { background: rgba(34,197,94,.15);  color: #4ade80; }
+        .chip-pend  { background: rgba(245,158,11,.15); color: #fbbf24; }
+        .chip-prog  { background: rgba(56,189,248,.15); color: #38bdf8; }
+        .chip-done  { background: rgba(34,197,94,.15);  color: #4ade80; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; padding: 1.5rem 1rem; }
+            .form-card { padding: 1.5rem 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+    <a href="/dashboard" class="brand mb-3"><i class="bi bi-check2-square"></i> Smart<span>Task</span></a>
+    <div class="nav-label">Main Menu</div>
+    <a href="/dashboard" class="nav-link-custom"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+    <a href="/tasks/new" class="nav-link-custom active"><i class="bi bi-plus-circle"></i> Add Task</a>
+    <div class="sidebar-footer">
+        <a href="/auth/logout" class="nav-link-custom" style="color:#f87171!important;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="page-header">
+        <a href="/dashboard" class="back-btn"><i class="bi bi-arrow-left"></i> Back</a>
+        <h1 class="page-title" th:text="${pageTitle}">Task Form</h1>
+    </div>
+
+    <div class="form-card">
+        <!-- Determine if editing or creating -->
+        <form th:action="${task.id != null ? '/tasks/edit/' + task.id : '/tasks/new'}"
+              th:object="${task}" method="post" novalidate>
+
+            <div class="section-title"><i class="bi bi-info-circle me-1"></i> Task Details</div>
+
+            <!-- Title -->
+            <div class="mb-3">
+                <label class="form-label">Task Title *</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-pencil"></i></span>
+                    <input type="text" th:field="*{title}"
+                           th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                           class="form-control" placeholder="E.g. Design landing page mockup" autofocus/>
+                </div>
+                <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('title')}"
+                     th:errors="*{title}"></div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <label class="form-label">Description</label>
+                <textarea th:field="*{description}"
+                          th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"
+                          class="form-control"
+                          placeholder="Add any additional notes or context for this task…"></textarea>
+                <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('description')}"
+                     th:errors="*{description}"></div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-sliders me-1"></i> Classification</div>
+
+            <div class="row g-3 mb-4">
+                <!-- Priority -->
+                <div class="col-md-6">
+                    <label class="form-label">Priority *</label>
+                    <select th:field="*{priority}"
+                            th:classappend="${#fields.hasErrors('priority')} ? 'is-invalid' : ''"
+                            class="form-select">
+                        <option value="" th:if="${task.priority == null}">Select priority…</option>
+                        <option th:each="p : ${priorities}"
+                                th:value="${p.name()}"
+                                th:text="${p.label}"
+                                th:selected="${task.priority == p}">Priority</option>
+                    </select>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('priority')}"
+                         th:errors="*{priority}"></div>
+                    <div class="hint-row">
+                        <span class="hint-chip chip-high"><i class="bi bi-arrow-up-circle-fill"></i> High</span>
+                        <span class="hint-chip chip-med"><i class="bi bi-dash-circle-fill"></i> Medium</span>
+                        <span class="hint-chip chip-low"><i class="bi bi-arrow-down-circle-fill"></i> Low</span>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-6">
+                    <label class="form-label">Status *</label>
+                    <select th:field="*{status}"
+                            th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''"
+                            class="form-select">
+                        <option value="" th:if="${task.status == null}">Select status…</option>
+                        <option th:each="s : ${statuses}"
+                                th:value="${s.name()}"
+                                th:text="${s.label}"
+                                th:selected="${task.status == s}">Status</option>
+                    </select>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('status')}"
+                         th:errors="*{status}"></div>
+                    <div class="hint-row">
+                        <span class="hint-chip chip-pend"><i class="bi bi-clock"></i> Pending</span>
+                        <span class="hint-chip chip-prog"><i class="bi bi-arrow-repeat"></i> In Progress</span>
+                        <span class="hint-chip chip-done"><i class="bi bi-check-circle"></i> Completed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex gap-3 align-items-center pt-2">
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-floppy me-1"></i>
+                    <span th:text="${task.id != null ? 'Update Task' : 'Create Task'}">Save</span>
+                </button>
+                <a href="/dashboard" class="btn-cancel-form">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

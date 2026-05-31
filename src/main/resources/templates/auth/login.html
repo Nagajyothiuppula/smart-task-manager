@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login – SmartTask</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --primary:   #5b4fff;
+            --primary-d: #4338f5;
+            --accent:    #ff6b6b;
+            --bg:        #0d0f1a;
+            --card:      #161927;
+            --border:    rgba(255,255,255,0.07);
+            --text:      #e8eaf6;
+            --muted:     #8b8fa8;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* animated gradient blobs */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.18;
+            pointer-events: none;
+        }
+        body::before {
+            width: 600px; height: 600px;
+            background: var(--primary);
+            top: -150px; left: -150px;
+            animation: blobA 12s ease-in-out infinite alternate;
+        }
+        body::after {
+            width: 500px; height: 500px;
+            background: var(--accent);
+            bottom: -100px; right: -100px;
+            animation: blobB 14s ease-in-out infinite alternate;
+        }
+        @keyframes blobA { from { transform: translate(0,0) scale(1); } to { transform: translate(80px,60px) scale(1.15); } }
+        @keyframes blobB { from { transform: translate(0,0) scale(1); } to { transform: translate(-60px,-80px) scale(1.2); } }
+
+        .auth-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.8rem 2.5rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+            position: relative;
+            z-index: 10;
+            animation: fadeUp .5s ease both;
+        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+
+        .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.65rem; letter-spacing: -0.5px; }
+        .brand span { color: var(--primary); }
+        .card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.5rem; margin-bottom: .25rem; }
+        .card-subtitle { color: var(--muted); font-size: .9rem; margin-bottom: 1.8rem; }
+
+        .form-label { font-size: .82rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
+        .input-group-text { background: #1e2235; border: 1px solid var(--border); color: var(--muted); }
+        .form-control {
+            background: #1e2235;
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: .65rem 1rem;
+            font-size: .95rem;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .form-control:focus { background: #1e2235; color: var(--text); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,79,255,.18); outline: none; }
+        .form-control::placeholder { color: #454869; }
+
+        .input-group .form-control { border-radius: 0 10px 10px 0; }
+        .input-group .input-group-text:first-child { border-radius: 10px 0 0 10px; }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            padding: .75rem;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            width: 100%;
+            color: #fff;
+            transition: background .2s, transform .15s, box-shadow .2s;
+            box-shadow: 0 6px 20px rgba(91,79,255,.35);
+        }
+        .btn-primary-custom:hover { background: var(--primary-d); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(91,79,255,.45); color: #fff; }
+
+        .divider { display: flex; align-items: center; gap: .75rem; color: var(--muted); font-size: .8rem; margin: 1.4rem 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .link-purple { color: var(--primary); text-decoration: none; font-weight: 500; }
+        .link-purple:hover { color: #7c6fff; text-decoration: underline; }
+
+        .alert-custom-success { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); color: #4ade80; border-radius: 10px; padding: .75rem 1rem; font-size: .88rem; }
+        .alert-custom-error   { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #f87171; border-radius: 10px; padding: .75rem 1rem; font-size: .88rem; }
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <!-- Brand -->
+    <div class="brand mb-4"><i class="bi bi-check2-square"></i> Smart<span>Task</span></div>
+
+    <h2 class="card-title">Welcome back</h2>
+    <p class="card-subtitle">Sign in to manage your tasks</p>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert-custom-success mb-3">
+        <i class="bi bi-check-circle-fill me-1"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert-custom-error mb-3">
+        <i class="bi bi-exclamation-circle-fill me-1"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Login Form -->
+    <form th:action="@{/auth/login}" method="post">
+        <!-- Username -->
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" name="username" class="form-control" placeholder="Enter your username" required autofocus/>
+            </div>
+        </div>
+        <!-- Password -->
+        <div class="mb-4">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" name="password" id="passwordField" class="form-control" placeholder="Enter your password" required/>
+                <span class="input-group-text" style="cursor:pointer;" onclick="togglePassword()">
+                    <i class="bi bi-eye" id="eyeIcon"></i>
+                </span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary-custom">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+        </button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <p class="text-center mb-0" style="font-size:.9rem; color:var(--muted);">
+        Don't have an account?
+        <a th:href="@{/auth/register}" class="link-purple">Create one</a>
+    </p>
+</div>
+
+<script>
+    function togglePassword() {
+        const f = document.getElementById('passwordField');
+        const i = document.getElementById('eyeIcon');
+        if (f.type === 'password') { f.type = 'text'; i.className = 'bi bi-eye-slash'; }
+        else { f.type = 'password'; i.className = 'bi bi-eye'; }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
